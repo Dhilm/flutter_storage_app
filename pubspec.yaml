@@ -1,0 +1,31 @@
+name: labwark7
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ✅ Shared Preferences (для логина)
+  shared_preferences: ^2.2.2
+
+  # ✅ Path Provider (для файлов)
+  path_provider: ^2.1.2
+
+  # ✅ Cupertino icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # ✅ Linting (рекомендуемый стиль)
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
