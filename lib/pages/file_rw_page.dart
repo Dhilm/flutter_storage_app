@@ -1,60 +1,137 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class FileRWPage extends StatefulWidget {
+  const FileRWPage({Key? key}) : super(key: key);
+
   @override
   _FileRWPageState createState() => _FileRWPageState();
 }
 
 class _FileRWPageState extends State<FileRWPage> {
   String _data = '';
+  final TextEditingController _controller = TextEditingController();
+  File? _file;
 
-  Future<String> _getFilePath() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return '${dir.path}/test.txt';
+  @override
+  void initState() {
+    super.initState();
+    _initFile(); // запускаем при старте
+  }
+
+  Future<void> _initFile() async {
+    final dir = await getApplicationDocumentsDirectory(); // 📁 Android/data/.../files
+    final file = File('${dir.path}/test.txt');
+    setState(() {
+      _file = file;
+    });
+    _readFromFile(); // сразу читаем
   }
 
   Future<void> _writeToFile(String text) async {
-    final path = await _getFilePath();
-    final file = File(path);
-    await file.writeAsString(text);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Файл сохранён.')));
+    if (_file == null) return;
+    await _file!.writeAsString(text);
+    _controller.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('✅ Сохранено в test.txt')),
+    );
   }
 
   Future<void> _readFromFile() async {
-    final path = await _getFilePath();
-    final file = File(path);
-    if (await file.exists()) {
-      String content = await file.readAsString();
+    if (_file == null) return;
+    if (await _file!.exists()) {
+      final content = await _file!.readAsString();
       setState(() {
         _data = content;
       });
     } else {
       setState(() {
-        _data = 'Файл не найден.';
+        _data = 'Файл не найден';
       });
     }
+  }
+
+  Future<void> _clearFile() async {
+    if (_file == null) return;
+    await _file!.writeAsString('');
+    setState(() {
+      _data = '';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('🧹 Файл очищен')),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('File Read/Write')),
+      appBar: AppBar(
+        title: const Text('Файл через path_provider'),
+        backgroundColor: Colors.teal,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: () => _writeToFile("Hello: ${DateTime.now()}"),
-              child: Text('Записать в файл'),
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                labelText: 'Введите текст',
+                border: OutlineInputBorder(),
+              ),
             ),
-            ElevatedButton(
-              onPressed: _readFromFile,
-              child: Text('Показать содержимое файла'),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _writeToFile(_controller.text),
+                    child: const Text('💾 Сохранить'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _readFromFile,
+                    child: const Text('📖 Прочитать'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Очистить файл',
+                  onPressed: _clearFile,
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            Text(_data, style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 20),
+            const Text('Содержимое файла:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _data.isNotEmpty ? _data : 'Файл пуст',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
