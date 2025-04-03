@@ -19,15 +19,22 @@ class _FileRWPageState extends State<FileRWPage> {
     final path = await _getFilePath();
     final file = File(path);
     await file.writeAsString(text);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Файл сохранён.')));
   }
 
   Future<void> _readFromFile() async {
     final path = await _getFilePath();
     final file = File(path);
-    String content = await file.readAsString();
-    setState(() {
-      _data = content;
-    });
+    if (await file.exists()) {
+      String content = await file.readAsString();
+      setState(() {
+        _data = content;
+      });
+    } else {
+      setState(() {
+        _data = 'Файл не найден.';
+      });
+    }
   }
 
   @override
@@ -40,11 +47,11 @@ class _FileRWPageState extends State<FileRWPage> {
           children: [
             ElevatedButton(
               onPressed: () => _writeToFile("Hello: ${DateTime.now()}"),
-              child: Text('Write to File'),
+              child: Text('Записать в файл'),
             ),
             ElevatedButton(
               onPressed: _readFromFile,
-              child: Text('Read from File'),
+              child: Text('Показать содержимое файла'),
             ),
             SizedBox(height: 20),
             Text(_data, style: TextStyle(fontSize: 16)),
