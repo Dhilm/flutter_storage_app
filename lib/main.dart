@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
-import 'pages/home_page.dart';
+import 'pages/signup_page.dart';
+import 'pages/file_rw_page.dart';
 
 void main() => runApp(MyApp());
 
@@ -8,12 +9,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Навигация',
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      title: 'Storage App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: LoginPage(),
       routes: {
-        '/': (context) => LoginPage(),
-        '/home': (context) => HomePage(),
+        '/signup': (context) => SignupPage(),
+        '/file': (context) => FileRWPage(),
       },
     );
   }
